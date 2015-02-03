@@ -1,0 +1,38 @@
+---
+accounts:
+#  - host: mail.example.net
+#    port: 143
+#    user: 'mailbox' # or 'mailbox@example.net'
+#    pass: 'testpass'
+#    # Use dots for hierarchy separators http://wiki2.dovecot.org/Namespaces
+#    dots_delimiter: true
+#    # Remove only read mail
+#    only_seen: false
+#    dirs:
+#      # Mailbox
+#      - dir: 'INBOX'
+#      # Period in days
+#        period: 14
+#      - dir: 'Junk'
+#        period: 3
+#      - dir: 'Sent'
+#        period: 7
+#      - dir: 'Archive'
+#        period: 365
+#    # Simulate to work but do nothing
+#    simulate: true
+#    # Only mark for deletion
+#    mark_delete_only: false
+
+  - host: mail2.example.net
+    port: 143
+    user: 'mailbox'
+    pass: 'testpass'
+    dots_delimiter: true
+    only_seen: false
+    dirs:
+      - dir: 'INBOX'
+        period: 7
+    simulate: false
+    mark_delete_only: false
+...
