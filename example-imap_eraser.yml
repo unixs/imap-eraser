@@ -23,6 +23,10 @@ accounts:
 #    simulate: true
 #    # Only mark for deletion
 #    mark_delete_only: false
+#    # Write log
+#    log: true
+#    # Logs files path. Possible values: '[/]path/to/logs', 'STDOUT'
+#    logpath: log
 
   - host: mail2.example.net
     port: 143
@@ -35,4 +39,6 @@ accounts:
         period: 7
     simulate: false
     mark_delete_only: false
+    log: true
+    logpath: STDOUT
 ...
