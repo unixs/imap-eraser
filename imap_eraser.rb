@@ -9,19 +9,50 @@ LOG_ADDRESS_FIELDS = [:from, :to]
 MAIN_LOOP_TIMEOUT = 3
 CONFIG_FILENAME = 'imap_eraser.yml'
 
+DEFAULT_LOG_PATH = '.'
+
+# Dummy logger for send all messages in /dev/null
+# Not need "require 'logger'"
+class DummyLogger
+  def method_missing(key, *args)
+  end
+end
+
 def read_config
   return YAML.load File.read CONFIG_FILENAME
 end
 
-def connect(account)
-  begin
-    imap = Net::IMAP.new account['host']
-    imap.starttls
-    imap.login account['user'], account['pass']
-    return imap
-  rescue Exception => ex
-    puts "\tERROR:#{Time.now}| Account [#{account['user']}[at]#{account['host']}] Exception: #{ex.message.force_encoding('utf-8')}"
+def set_log(account)
+  if (account['log'])
+    require 'logger'
+
+    # STDOUT logger
+    if (account['logpath'] == 'STDOUT')
+      return Logger.new STDOUT
+    end
+
+    # File logger
+    logfile = "#{account['host']}|#{account['user']}.log"
+    logpath =  File.expand_path account['logpath'] ? account['logpath'] : DEFAULT_LOG_PATH
+
+    if Dir.exist? logpath
+      logger = Logger.new "#{logpath}/#{logfile}", 10, 4096000
+    else
+      logger = Logger.new STDOUT
+      logger.warn "Log dir #{logpath} does not exist."
+    end
+  else
+    logger = DummyLogger.new
   end
+
+  return logger
+end
+
+def connect(account)
+  imap = Net::IMAP.new account['host']
+  imap.starttls
+  imap.login account['user'], account['pass']
+  return imap
 end
 
 def disconnect(imap)
@@ -49,20 +80,24 @@ def encode_path(box, dots_delimiter)
 end
 
 def process(account)
-  account_uid = "#{account['user']}[at]#{account['host']}"
-  puts "Account start: #{Time.now}| #{account_uid}"
-  puts "\tSimulate mode" if account['simulate']
-  imap = connect account
-  released_memory = 0
+  # Set logger
+  logger = set_log account
 
-  if (imap)
+  account_uid = "#{account['user']}[at]#{account['host']}"
+  logger.info "Account start: #{account_uid}"
+  logger.info "\tSimulate mode" if account['simulate']
+
+  begin
+    released_memory = 0
+    imap = connect account
+
     account['dirs'].each do |dir|
       unless dir['period']
-        puts "\tWARNING:#{Time.now}| Mailbox [#{dir['dir']}] has empty period. Ignore mailbox"
+        logger.warn "\tMailbox [#{dir['dir']}] has empty period. Ignore mailbox"
         next
       end
       before = Net::IMAP.format_date(before_date(today(), dir['period']))
-      puts "#===>#{before} #{dir['dir']}"
+      logger.info "MBOX #={ #{before} }==> #{dir['dir']}"
 
       mailbox = encode_path(dir['dir'], account['dots_delimiter'])
 
@@ -113,7 +148,7 @@ def process(account)
             rfc822_size = msg[:attr]['RFC822.SIZE']
             released_memory += rfc822_size
 
-            puts "\t|#{internaldate} Size:#{rfc822_size} #{address_fields.join(' ')} Subject:#{subject}"
+            logger.info "\t|#{internaldate}| Size:#{rfc822_size} #{address_fields.join(' ')} Subject:#{subject}"
           end
 
         end # /while
@@ -122,15 +157,17 @@ def process(account)
           imap.close
         end
       rescue Exception => ex
-        puts "\tERROR:#{Time.now}| Mailbox [#{dir['dir']}] Exception: #{ex.message.force_encoding('utf-8')}"
+        logger.warn "\t MBOX [#{dir['dir']}] Exception: #{ex.message.force_encoding('utf-8')}"
         #raise ex
       end
     end
 
     disconnect imap
+  rescue Exception => ex
+    logger.error "\tAccount [#{account['user']}[at]#{account['host']}] Exception: #{ex.message.force_encoding('utf-8')}"
   end
-  puts "Account finish: #{Time.now}| #{account_uid} Memory released: #{released_memory}"
-  puts "\n"
+
+  logger.info "Account finished: #{Time.now}| #{account_uid} Memory released: #{released_memory}"
 end
 
 conf = read_config
