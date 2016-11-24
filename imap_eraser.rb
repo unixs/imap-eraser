@@ -56,11 +56,10 @@ def connect(account)
 end
 
 def disconnect(imap)
-  begin
-    imap.logout
-    imap.disconnect
-  rescue
-  end
+  imap.logout
+  imap.disconnect
+rescue ex
+  raise ex
 end
 
 def before_date(date, before)
@@ -74,6 +73,7 @@ end
 
 def encode_path(box, dots_delimiter)
   box = Net::IMAP.encode_utf7 box
+
   if dots_delimiter
     box = box.split('/').join '.'
   end
@@ -156,14 +156,14 @@ def process(account)
         unless account['mark_delete_only']
           imap.close
         end
-      rescue Exception => ex
+      rescue StandardError => ex
         logger.warn "\t MBOX [#{dir['dir']}] Exception: #{ex.message.force_encoding('utf-8')}"
         #raise ex
       end
     end
 
     disconnect imap
-  rescue Exception => ex
+  rescue StandardError => ex
     logger.error "\tAccount [#{account['user']}[at]#{account['host']}] Exception: #{ex.message.force_encoding('utf-8')}"
   end
 
