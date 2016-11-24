@@ -35,3 +35,5 @@ build/
 
 *~
 imap_eraser.yml
+log/
+.vscode/

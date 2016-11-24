@@ -50,7 +50,7 @@ end
 
 def connect(account)
   imap = Net::IMAP.new account['host']
-  imap.starttls
+  #imap.starttls
   imap.login account['user'], account['pass']
   return imap
 end
@@ -64,12 +64,12 @@ def disconnect(imap)
 end
 
 def before_date(date, before)
-  return date - (60 * 60 * 24 * before)
+  date - (60 * 60 * 24 * before)
 end
 
 def today
   now = Time.now
-  return Time.new now.year, now.month, now.day
+  Time.new now.year, now.month, now.day
 end
 
 def encode_path(box, dots_delimiter)
@@ -111,9 +111,9 @@ def process(account)
           conditions.push 'SEEN'
         end
         # Get messages ids array
-        messages = imap.search conditions 
+        messages = imap.search conditions
 
-        
+
         while (!(mids = messages.slice!(0, IMAP_FETCH_LIMIT)).empty?) do
 
           # Delete messages
