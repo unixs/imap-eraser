@@ -1,0 +1,68 @@
+---
+accounts:
+  - host: mail.unixcomp.org
+    port: 143
+    user: 'vester@unixcomp.org'
+    pass: 'EhFy*238#mycryptmaiL'
+    # Использовать точку как разделитель для вложенных каталогов (автоматически)
+    dots_delimiter: true
+    # Удалять только прочитанные сообщения
+    only_seen: false
+    dirs:
+      - dir: 'Lists/Alib'
+        period: 7
+      - dir: 'Lists/Ubuntu'
+        period: 7
+      - dir: 'Питер'
+        period: 7
+      - dir: 'Питербург'
+        period: 7
+      - dir: 'Junk'
+        period: 3
+    # Симулировать работу, но ничего не выполнять
+    simulate: true
+    # Только пометить сообщения как удаляемые. Фактически не удалять.
+    mark_delete_only: false
+    # Вести журнал удаляемых сообщений
+    log: false
+    # Путь до каталога с журналом
+    logpath: STDOUT
+
+  - host: mail.unixcomp.org
+    port: 143
+    user: 'vester@sky-unix.ru'
+    pass: '41226579'
+    # Использовать точку как разделитель для вложенных каталогов (автоматически)
+    dots_delimiter: true
+    # Удалять только прочитанные сообщения
+    only_seen: true
+    dirs:
+      - dir: 'INBOX'
+        period: 7
+    simulate: true
+    mark_delete_only: false
+    log: false
+    logpath: STDOUT
+
+  # - host: 10.255.2.13
+  #   port: 143
+  #   user: 'pap'
+  #   pass: 'papmail'
+  #   # Использовать точку как разделитель для вложенных каталогов (автоматически)
+  #   dots_delimiter: false
+  #   # Удалять только прочитанные сообщения
+  #   only_seen: true
+  #   dirs:
+  #     - dir: 'INBOX'
+  #       period: 180
+  #     - dir: 'Sent'
+  #       period: 7
+  #     - dir: 'INBOX/Travel-Info'
+  #       period: 7
+  #     - dir: 'Днепровой'
+  #       period: 7
+  #   simulate: true
+  #   mark_delete_only: true
+  #   log: true
+  #   logpath: STDOUT
+...
